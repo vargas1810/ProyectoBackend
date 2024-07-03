@@ -5,6 +5,7 @@ from schemas import UsuarioSchema
 auth = Blueprint('auth', __name__)
 
 usuario_schema = UsuarioSchema()
+
 @auth.route('/register', methods=['POST'])
 def register():
     nombre_usuario = request.json.get('nombre_usuario')

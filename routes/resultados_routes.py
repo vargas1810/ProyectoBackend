@@ -9,15 +9,23 @@ resultados_preguntas_schema = ResultadosPreguntasSchema()
 resultados_schema = ResultadosSchema()
 resultados_schemas = ResultadosSchema(many=True)
 
+
 @resultados_bp.route('/resultados_preguntas', methods=['POST'])
 def add_resultado_pregunta():
-    estudiante_id = request.json['estudiante_id']
-    pregunta_id = request.json['pregunta_id']
-    respuesta_id = request.json['respuesta_id']
-    tipo_test_id = request.json['tipo_test_id']
+    data = request.get_json()
+    estudiante_id = data.get('estudiante_id')
+    pregunta_id = data.get('pregunta_id')
+    respuesta_id = data.get('respuesta_id')
+    tipo_test_id = data.get('tipo_test_id')
 
-    if ResultadosPreguntas.query.filter_by(estudiante_id=estudiante_id, pregunta_id=pregunta_id, tipo_test_id=tipo_test_id).first():
-        return jsonify({'message': 'Pregunta already answered by this student'}), 400
+    # Verificación de existencia de IDs
+    estudiante = estudiante.query.get(estudiante_id)
+    pregunta = pregunta.query.get(pregunta_id)
+    respuesta = respuesta.query.get(respuesta_id)
+    tipo_test = tipo_test.query.get(tipo_test_id)
+
+    if not estudiante or not pregunta or not respuesta or not tipo_test:
+        return jsonify({'message': 'Invalid ID(s) provided'}), 400
 
     new_resultado_pregunta = ResultadosPreguntas(
         estudiante_id=estudiante_id,
@@ -28,6 +36,7 @@ def add_resultado_pregunta():
     db.session.add(new_resultado_pregunta)
     db.session.commit()
     return resultados_preguntas_schema.jsonify(new_resultado_pregunta), 201
+
 
 @resultados_bp.route('/resultados/<int:estudiante_id>', methods=['GET'])
 def get_resultados(estudiante_id):
