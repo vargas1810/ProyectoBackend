@@ -193,7 +193,6 @@ def add_resultado_pregunta():
 
 @auth.route('/resultados/<int:estudiante_id>', methods=['GET'])
 def get_resultados(estudiante_id):
-    # Obtener el tipo de test del cuerpo de la solicitud (o de alguna otra manera)
     tipo_test_id = request.args.get('tipo_test_id', type=int)
 
     if not tipo_test_id:
@@ -204,8 +203,7 @@ def get_resultados(estudiante_id):
         return jsonify({'message': 'No hay resultados para este estudiante y tipo de test'}), 404
     
     total_puntaje = sum([respuesta.respuesta.puntaje_respuesta for respuesta in resultados_preguntas])
-
-    # Filtrar condiciones por el tipo de test y el rango de puntaje
+    
     condicion = Condicion.query.filter(
         Condicion.min_puntaje <= total_puntaje,
         Condicion.max_puntaje >= total_puntaje,
@@ -215,7 +213,6 @@ def get_resultados(estudiante_id):
     if not condicion:
         return jsonify({'message': 'No condition found for this score'}), 404
 
-    # Verificar si ya existe un resultado para este estudiante y tipo de test
     if Resultados.query.filter_by(estudiante_id=estudiante_id, tipo_test_id=tipo_test_id).first():
         return jsonify({'message': 'Ya existe un resultado para este test'}), 400
 
@@ -231,8 +228,10 @@ def get_resultados(estudiante_id):
     return jsonify({
         'estudiante_id': estudiante_id,
         'condicion_id': condicion.id,
-        'condicion': condicion.nombre_condicion
+        'condicion': condicion.nombre_condicion,
+        'color': condicion.color
     }), 201
+
 
 @auth.route('/resultados_estudiante/<int:estudiante_id>', methods=['GET'])
 def get_resultados_estudiante(estudiante_id):
@@ -299,12 +298,20 @@ def get_usuarios_localizacion():
     for usuario in usuarios:
         ubigeo = Ubigeo.query.get(usuario.ubigeo_id)
         if ubigeo and ubigeo.latitud and ubigeo.longitud:
+            resultado = Resultados.query.filter_by(estudiante_id=usuario.id).first()
+            if resultado:
+                condicion = Condicion.query.get(resultado.condicion_id)
+                color = condicion.color if condicion else 'gray'  # Valor por defecto si no hay condición
+            else:
+                color = 'gray'  # Valor por defecto si no hay resultado
+            
             usuario_info = {
                 'nombre_usuario': usuario.nombre_usuario,
                 'email': usuario.email,
                 'ciudad': ubigeo.nombre_ciudad,
                 'latitud': ubigeo.latitud,
-                'longitud': ubigeo.longitud
+                'longitud': ubigeo.longitud,
+                'color': color
             }
             usuarios_localizacion.append(usuario_info)
 

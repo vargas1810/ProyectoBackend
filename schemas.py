@@ -41,6 +41,8 @@ class CondicionSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Condicion
         load_instance = True
+    color = ma.String()
+
 
 class ResultadosPreguntasSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
