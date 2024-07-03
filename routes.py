@@ -330,9 +330,9 @@ def get_usuarios_localizacion():
 
 
 @auth.route('/usuarios/resultados', methods=['GET'])
-def get_usuarios_con_resultados():
+def get_usuarios_resultados():
     usuarios = Usuario.query.all()
-    usuarios_con_resultados = []
+    usuarios_resultados = []
 
     for usuario in usuarios:
         resultado_test_1 = Resultados.query.filter_by(estudiante_id=usuario.id, tipo_test_id=1).first()
@@ -367,6 +367,6 @@ def get_usuarios_con_resultados():
                 'color_test_2': color_test_2,
                 'nombre_tipo_test_2': nombre_tipo_test_2
             }
-            usuarios_con_resultados.append(usuario_info)
+            usuarios_resultados.append(usuario_info)
 
-    return jsonify(usuarios_con_resultados), 200
+    return jsonify(usuarios_resultados), 200
