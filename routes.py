@@ -290,7 +290,6 @@ def add_condicion():
     db.session.commit()
     return condicion_schema.jsonify(nueva_condicion), 201
 
-
 @auth.route('/usuarios/localizacion', methods=['GET'])
 def get_usuarios_localizacion():
     usuarios = Usuario.query.all()
@@ -315,42 +314,21 @@ def get_usuarios_localizacion():
                 if condicion_test_2:
                     color_test_2 = condicion_test_2.color
 
-            # Filtrar los usuarios solo si ambos colores son grises
-            if not (color_test_1 == 'gray' and color_test_2 == 'gray'):
-                usuario_info = {
-                    'nombre_usuario': usuario.nombre_usuario,
-                    'email': usuario.email,
-                    'ciudad': ubigeo.nombre_ciudad,
-                    'latitud': ubigeo.latitud,
-                    'longitud': ubigeo.longitud,
-                    'color_test_1': color_test_1,
-                    'color_test_2': color_test_2
-                }
-                usuarios_localizacion.append(usuario_info)
+            usuario_info = {
+                'nombre_usuario': usuario.nombre_usuario,
+                'email': usuario.email,
+                'ciudad': ubigeo.nombre_ciudad,
+                'latitud': ubigeo.latitud,
+                'longitud': ubigeo.longitud,
+                'color_test_1': color_test_1,
+                'color_test_2': color_test_2
+            }
+            usuarios_localizacion.append(usuario_info)
 
     return jsonify(usuarios_localizacion), 200
 
-@auth.route('/resultados/<int:resultado_id>', methods=['PATCH'])
-def update_resultado(resultado_id):
-    resultado = Resultados.query.get(resultado_id)
-    if not resultado:
-        return jsonify({'message': 'Resultado no encontrado'}), 404
 
-    condicion_id = request.json.get('condicion_id')
-    if not condicion_id:
-        return jsonify({'message': 'Condición es requerida'}), 400
 
-    nueva_condicion = Condicion.query.get(condicion_id)
-    if not nueva_condicion:
-        return jsonify({'message': 'Condición no válida'}), 400
-
-    resultado.condicion_id = condicion_id
-    db.session.commit()
-
-    return jsonify({
-        'message': 'Resultado actualizado',
-        'resultado': resultados_schema.dump(resultado)
-    }), 200
 @auth.route('/usuarios/resultados', methods=['GET'])
 def get_usuarios_con_resultados():
     usuarios = Usuario.query.all()
