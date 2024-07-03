@@ -289,7 +289,6 @@ def add_condicion():
     db.session.add(nueva_condicion)
     db.session.commit()
     return condicion_schema.jsonify(nueva_condicion), 201
-
 @auth.route('/usuarios/localizacion', methods=['GET'])
 def get_usuarios_localizacion():
     usuarios = Usuario.query.all()
@@ -298,20 +297,30 @@ def get_usuarios_localizacion():
     for usuario in usuarios:
         ubigeo = Ubigeo.query.get(usuario.ubigeo_id)
         if ubigeo and ubigeo.latitud and ubigeo.longitud:
-            resultado = Resultados.query.filter_by(estudiante_id=usuario.id).first()
-            if resultado:
-                condicion = Condicion.query.get(resultado.condicion_id)
-                color = condicion.color if condicion else 'gray'  # Valor por defecto si no hay condición
-            else:
-                color = 'gray'  # Valor por defecto si no hay resultado
-            
+            resultado_test_1 = Resultados.query.filter_by(estudiante_id=usuario.id, tipo_test_id=1).first()
+            resultado_test_2 = Resultados.query.filter_by(estudiante_id=usuario.id, tipo_test_id=2).first()
+
+            color_test_1 = 'gray'
+            color_test_2 = 'gray'
+
+            if resultado_test_1:
+                condicion_test_1 = Condicion.query.get(resultado_test_1.condicion_id)
+                if condicion_test_1:
+                    color_test_1 = condicion_test_1.color
+
+            if resultado_test_2:
+                condicion_test_2 = Condicion.query.get(resultado_test_2.condicion_id)
+                if condicion_test_2:
+                    color_test_2 = condicion_test_2.color
+
             usuario_info = {
                 'nombre_usuario': usuario.nombre_usuario,
                 'email': usuario.email,
                 'ciudad': ubigeo.nombre_ciudad,
                 'latitud': ubigeo.latitud,
                 'longitud': ubigeo.longitud,
-                'color': color
+                'color_test_1': color_test_1,
+                'color_test_2': color_test_2
             }
             usuarios_localizacion.append(usuario_info)
 
