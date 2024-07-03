@@ -370,3 +370,52 @@ def get_usuarios_resultados():
             usuarios_resultados.append(usuario_info)
 
     return jsonify(usuarios_resultados), 200
+
+@auth.route('/informacion', methods=['GET'])
+def get_informacion_completa():
+    usuarios = Usuario.query.all()
+    informacion_completa = []
+
+    for usuario in usuarios:
+        ubigeo = Ubigeo.query.get(usuario.ubigeo_id)
+        resultado_test_1 = Resultados.query.filter_by(estudiante_id=usuario.id, tipo_test_id=1).first()
+        resultado_test_2 = Resultados.query.filter_by(estudiante_id=usuario.id, tipo_test_id=2).first()
+
+        color_test_1 = 'gray'
+        condicion_test_1 = 'N/A'
+        puntaje_test_1 = 'N/A'
+
+        if resultado_test_1:
+            condicion_obj_1 = Condicion.query.get(resultado_test_1.condicion_id)
+            if condicion_obj_1:
+                color_test_1 = condicion_obj_1.color
+                condicion_test_1 = condicion_obj_1.nombre_condicion
+                puntaje_test_1 = sum([rp.respuesta.puntaje_respuesta for rp in ResultadosPreguntas.query.filter_by(estudiante_id=usuario.id, tipo_test_id=1).all()])
+
+        color_test_2 = 'gray'
+        condicion_test_2 = 'N/A'
+        puntaje_test_2 = 'N/A'
+
+        if resultado_test_2:
+            condicion_obj_2 = Condicion.query.get(resultado_test_2.condicion_id)
+            if condicion_obj_2:
+                color_test_2 = condicion_obj_2.color
+                condicion_test_2 = condicion_obj_2.nombre_condicion
+                puntaje_test_2 = sum([rp.respuesta.puntaje_respuesta for rp in ResultadosPreguntas.query.filter_by(estudiante_id=usuario.id, tipo_test_id=2).all()])
+
+        usuario_info = {
+            'nombre_usuario': usuario.nombre_usuario,
+            'email': usuario.email,
+            'ciudad': ubigeo.nombre_ciudad if ubigeo else 'N/A',
+            'latitud': ubigeo.latitud if ubigeo else 'N/A',
+            'longitud': ubigeo.longitud if ubigeo else 'N/A',
+            'color_test_1': color_test_1,
+            'condicion_test_1': condicion_test_1,
+            'puntaje_test_1': puntaje_test_1,
+            'color_test_2': color_test_2,
+            'condicion_test_2': condicion_test_2,
+            'puntaje_test_2': puntaje_test_2,
+        }
+        informacion_completa.append(usuario_info)
+
+    return jsonify(informacion_completa), 200
