@@ -289,6 +289,8 @@ def add_condicion():
     db.session.add(nueva_condicion)
     db.session.commit()
     return condicion_schema.jsonify(nueva_condicion), 201
+
+
 @auth.route('/usuarios/localizacion', methods=['GET'])
 def get_usuarios_localizacion():
     usuarios = Usuario.query.all()
@@ -313,15 +315,17 @@ def get_usuarios_localizacion():
                 if condicion_test_2:
                     color_test_2 = condicion_test_2.color
 
-            usuario_info = {
-                'nombre_usuario': usuario.nombre_usuario,
-                'email': usuario.email,
-                'ciudad': ubigeo.nombre_ciudad,
-                'latitud': ubigeo.latitud,
-                'longitud': ubigeo.longitud,
-                'color_test_1': color_test_1,
-                'color_test_2': color_test_2
-            }
-            usuarios_localizacion.append(usuario_info)
+            # Filtrar los usuarios solo si ambos colores son grises
+            if not (color_test_1 == 'gray' and color_test_2 == 'gray'):
+                usuario_info = {
+                    'nombre_usuario': usuario.nombre_usuario,
+                    'email': usuario.email,
+                    'ciudad': ubigeo.nombre_ciudad,
+                    'latitud': ubigeo.latitud,
+                    'longitud': ubigeo.longitud,
+                    'color_test_1': color_test_1,
+                    'color_test_2': color_test_2
+                }
+                usuarios_localizacion.append(usuario_info)
 
     return jsonify(usuarios_localizacion), 200
