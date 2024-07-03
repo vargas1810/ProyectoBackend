@@ -329,3 +329,66 @@ def get_usuarios_localizacion():
                 usuarios_localizacion.append(usuario_info)
 
     return jsonify(usuarios_localizacion), 200
+
+@auth.route('/resultados/<int:resultado_id>', methods=['PATCH'])
+def update_resultado(resultado_id):
+    resultado = Resultados.query.get(resultado_id)
+    if not resultado:
+        return jsonify({'message': 'Resultado no encontrado'}), 404
+
+    condicion_id = request.json.get('condicion_id')
+    if not condicion_id:
+        return jsonify({'message': 'Condición es requerida'}), 400
+
+    nueva_condicion = Condicion.query.get(condicion_id)
+    if not nueva_condicion:
+        return jsonify({'message': 'Condición no válida'}), 400
+
+    resultado.condicion_id = condicion_id
+    db.session.commit()
+
+    return jsonify({
+        'message': 'Resultado actualizado',
+        'resultado': resultados_schema.dump(resultado)
+    }), 200
+@auth.route('/usuarios/resultados', methods=['GET'])
+def get_usuarios_con_resultados():
+    usuarios = Usuario.query.all()
+    usuarios_con_resultados = []
+
+    for usuario in usuarios:
+        resultado_test_1 = Resultados.query.filter_by(estudiante_id=usuario.id, tipo_test_id=1).first()
+        resultado_test_2 = Resultados.query.filter_by(estudiante_id=usuario.id, tipo_test_id=2).first()
+
+        color_test_1 = 'gray'
+        nombre_tipo_test_1 = None
+        if resultado_test_1:
+            condicion_test_1 = Condicion.query.get(resultado_test_1.condicion_id)
+            tipo_test_1 = TiposTest.query.get(1)
+            if condicion_test_1 and tipo_test_1:
+                color_test_1 = condicion_test_1.color
+                nombre_tipo_test_1 = tipo_test_1.nombre_tipo
+
+        color_test_2 = 'gray'
+        nombre_tipo_test_2 = None
+        if resultado_test_2:
+            condicion_test_2 = Condicion.query.get(resultado_test_2.condicion_id)
+            tipo_test_2 = TiposTest.query.get(2)
+            if condicion_test_2 and tipo_test_2:
+                color_test_2 = condicion_test_2.color
+                nombre_tipo_test_2 = tipo_test_2.nombre_tipo
+
+        # Filtrar los usuarios solo si ambos colores son grises
+        if not (color_test_1 == 'gray' and color_test_2 == 'gray'):
+            usuario_info = {
+                'nombre_usuario': usuario.nombre_usuario,
+                'email': usuario.email,
+                'ciudad': usuario.ubigeo.nombre_ciudad,
+                'color_test_1': color_test_1,
+                'nombre_tipo_test_1': nombre_tipo_test_1,
+                'color_test_2': color_test_2,
+                'nombre_tipo_test_2': nombre_tipo_test_2
+            }
+            usuarios_con_resultados.append(usuario_info)
+
+    return jsonify(usuarios_con_resultados), 200
