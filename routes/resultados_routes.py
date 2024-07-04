@@ -54,8 +54,6 @@ def get_resultados(estudiante_id):
     if not condicion:
         return jsonify({'message': 'No condition found for this score'}), 404
 
-    if Resultados.query.filter_by(estudiante_id=estudiante_id, tipo_test_id=tipo_test_id).first():
-        return jsonify({'message': 'Ya existe un resultado para este test'}), 400
 
     new_resultado = Resultados(
         estudiante_id=estudiante_id,
