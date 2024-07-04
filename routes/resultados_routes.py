@@ -12,19 +12,13 @@ resultados_schemas = ResultadosSchema(many=True)
 
 @resultados_bp.route('/resultados_preguntas', methods=['POST'])
 def add_resultado_pregunta():
-    data = request.get_json()
-    estudiante_id = data.get('estudiante_id')
-    pregunta_id = data.get('pregunta_id')
-    respuesta_id = data.get('respuesta_id')
-    tipo_test_id = data.get('tipo_test_id')
+    estudiante_id = request.json['estudiante_id']
+    pregunta_id = request.json['pregunta_id']
+    respuesta_id = request.json['respuesta_id']
+    tipo_test_id = request.json['tipo_test_id']
 
-    # Verificación de existencia de IDs
-    estudiante = estudiante.query.get(estudiante_id)
-    pregunta = pregunta.query.get(pregunta_id)
-    respuesta = respuesta.query.get(respuesta_id)
-    tipo_test = tipo_test.query.get(tipo_test_id)
 
-    if not estudiante or not pregunta or not respuesta or not tipo_test:
+    if not estudiante_id or not pregunta_id or not respuesta_id or not tipo_test_id:
         return jsonify({'message': 'Invalid ID(s) provided'}), 400
 
     new_resultado_pregunta = ResultadosPreguntas(
